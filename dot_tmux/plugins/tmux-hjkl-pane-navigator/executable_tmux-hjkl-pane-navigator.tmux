@@ -1,0 +1,14 @@
+#!/bin/sh
+#
+# The `is_vim` check is crucial for passing keys to Neovim.
+# This variable checks if the current pane is running Neovim.
+is_vim="ps -o state= -o comm= -t '#{pane_tty}' | grep -iqE '^[^TXZ ]+ +(\\S+\\/)?g?(view|n?vim?x?)(diff)?$'"
+
+# Bind a specific key to a command. The `-n` flag makes it non-prefixed.
+# If the pane is running Neovim, send the keypress to it.
+# Otherwise, switch to the adjacent pane.
+tmux bind-key -n C-h if-shell "$is_vim" 'send-keys C-h'  'select-pane -L'
+tmux bind-key -n C-j if-shell "$is_vim" 'send-keys C-j'  'select-pane -D'
+tmux bind-key -n C-k if-shell "$is_vim" 'send-keys C-k'  'select-pane -U'
+tmux bind-key -n C-l if-shell "$is_vim" 'send-keys C-l'  'select-pane -R'
+tmux bind-key -n C-\ if-shell "$is_vim" 'send-keys C-\\' 'select-pane -l'
