@@ -94,6 +94,10 @@ local config = {
 	},
 }
 
+if os.getenv('WSL_DISTRO_NAME') then
+  config.default_domain = 'WSL:' .. os.getenv('WSL_DISTRO_NAME')
+end
+
 -- Add LEADER + number to switch to tab 1-9
 for i = 1, 9 do
 	table.insert(config.keys, {

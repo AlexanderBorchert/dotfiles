@@ -3,6 +3,7 @@
 
 fish_add_path ~/.local/bin
 fish_add_path ~/bin
+fish_add_path /opt/nvim-linux-x86_64/bin
 
 
 
@@ -26,6 +27,11 @@ zoxide init fish | source
 # Created by `pipx` on 2025-12-14 17:34:20
 set -gx PATH $PATH ~/.local/bin
 
+# vim key bindings
+set -g fish_key_bindings fish_vi_key_bindings
+
+# starship
+starship init fish | source
 
 # Initialize nvm
 set -x NVM_DIR $HOME/.nvm
