@@ -18,7 +18,24 @@ return {
         commented = true, -- Show virtual text alongside comment
       })
 
-      dap_python.setup("python")
+      dap_python.setup(vim.fn.getcwd() .. "/.venv/bin/python")
+
+      dap.configurations.python = {
+        {
+          type = "python",
+          request = "launch",
+          name = "PemmDbTransform (module)",
+          module = "PemmDbTransform",
+          args = {
+            "2024-01-15",
+            "PemmDbTransform/run_app/input",
+            "PemmDbTransform/run_app/nep",
+            "PemmDbTransform/run_app",
+          },
+          cwd = vim.fn.getcwd(),
+          console = "integratedTerminal",
+        },
+      }
 
       vim.fn.sign_define("DapBreakpoint", {
         text = "",
@@ -36,7 +53,7 @@ return {
 
       vim.fn.sign_define("DapStopped", {
         text = "", -- or "→"
-        texthl = "DiagnosticSignWarn",
+        texthl = "Diag",
         linehl = "Visual",
         numhl = "DiagnosticSignWarn",
       })
@@ -48,65 +65,28 @@ return {
 
       local opts = { noremap = true, silent = true }
 
-      -- Toggle breakpoint
       vim.keymap.set("n", "<leader>db", function()
         dap.toggle_breakpoint()
-      end, opts)
+      end, vim.tbl_extend("force", opts, { desc = "Toggle breakpoint" }))
 
-      -- Continue / Start
       vim.keymap.set("n", "<leader>dc", function()
         dap.continue()
-      end, opts)
-
-      -- Step Over
+      end, vim.tbl_extend("force", opts, { desc = "Continue / Start debugging" }))
       vim.keymap.set("n", "<leader>do", function()
         dap.step_over()
-      end, opts)
-
-      -- Step Into
+      end, vim.tbl_extend("force", opts, { desc = "Step over" }))
       vim.keymap.set("n", "<leader>di", function()
         dap.step_into()
-      end, opts)
-
-      -- Step Out
+      end, vim.tbl_extend("force", opts, { desc = "Step into" }))
       vim.keymap.set("n", "<leader>dO", function()
         dap.step_out()
-      end, opts)
-
-      -- Keymap to terminate debugging
+      end, vim.tbl_extend("force", opts, { desc = "Step out" }))
       vim.keymap.set("n", "<leader>dq", function()
-        require("dap").terminate()
-      end, opts)
-
-      -- Toggle DAP UI
+        dap.terminate()
+      end, vim.tbl_extend("force", opts, { desc = "Terminate debug session" }))
       vim.keymap.set("n", "<leader>du", function()
         dapui.toggle()
-      end, opts)
+      end, vim.tbl_extend("force", opts, { desc = "Toggle DAP UI" }))
     end,
   },
 }
---
---
---
---
--- return {
---   {
---     "mfussenegger/nvim-dap",
---     lazy = false,
---     dependencies = {
---       "mfussenegger/nvim-dap-python",
---     },
---     config = function()
---       local dap = require("dap")
---       local dap_python = require("dap-python")
---
---       dap_python.setup("python3")
---
---       vim.keymap.set("n", "<leader>db", dap.toggle_breakpoint)
---       vim.keymap.set("n", "<leader>dc", dap.continue)
---       vim.keymap.set("n", "<leader>do", dap.step_over)
---       vim.keymap.set("n", "<leader>di", dap.step_into)
---       vim.keymap.set("n", "<leader>dO", dap.step_out)
---     end,
---   },
--- }
