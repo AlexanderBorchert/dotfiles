@@ -1,0 +1,17 @@
+# Legt die globale Reihenfolge der Module fest
+format = """
+$directory\
+$git_branch\
+$git_status\
+$battery\
+$line_break\
+$character"""
+
+[[battery.display]]
+threshold = 40
+style = "bold yellow"
+
+# Ändert die Farbe auf Rot, wenn der Akku unter 20% fällt
+[[battery.display]]
+threshold = 20
+style = "bold red"

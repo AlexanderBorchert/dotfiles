@@ -2,7 +2,7 @@ local wezterm = require("wezterm")
 
 local config = {
 
-	default_domain = "WSL:Ubuntu-24.04",
+	-- default_domain = "WSL:Ubuntu-24.04",
 
 	leader = { key = "Space", mods = "CTRL", timeout_milliseconds = 2000 },
 
