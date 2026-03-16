@@ -8,10 +8,10 @@ $line_break\
 $character"""
 
 [[battery.display]]
-threshold = 40
+threshold = 30
 style = "bold yellow"
 
 # Ändert die Farbe auf Rot, wenn der Akku unter 20% fällt
 [[battery.display]]
-threshold = 20
+threshold = 10
 style = "bold red"

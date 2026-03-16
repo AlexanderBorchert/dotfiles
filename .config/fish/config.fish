@@ -1,11 +1,8 @@
-
 #add to PATH
 
 fish_add_path ~/.local/bin
 fish_add_path ~/bin
 fish_add_path /opt/nvim-linux-x86_64/bin
-
-
 
 if status is-interactive
     # Commands to run in interactive sessions can go here
@@ -21,19 +18,21 @@ function y
     rm -f -- "$tmp"
 end
 
+function fish_greeting
+    echo "fish started" | set_color cyan
+end
+
 # zoxide
 zoxide init fish | source
 
 # Created by `pipx` on 2025-12-14 17:34:20
 set -gx PATH $PATH ~/.local/bin
 
-# vim key bindings
+# vim key bindings in fish
 set -g fish_key_bindings fish_vi_key_bindings
+
+# vim as default editor
+set -gx EDITOR nvim
 
 # starship
 starship init fish | source
-
-# Initialize nvm
-set -x NVM_DIR $HOME/.nvm
-bass source $NVM_DIR/nvm.sh --no-use
-
