@@ -1,0 +1,1 @@
+to create the links to the configs in .dotfiles/ cd into .dotfiles/ and exectute "stow ."
