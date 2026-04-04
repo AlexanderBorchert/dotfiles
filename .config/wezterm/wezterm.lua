@@ -7,20 +7,30 @@ local config = wezterm.config_builder()
 -- --------------------------------------------------------------------
 config.color_scheme = "Google Light (base16)"
 config.font = wezterm.font("JetBrainsMono Nerd Font")
-config.initial_cols = 120
-config.initial_rows = 30
 config.window_padding = { left = 0, right = 0, top = 0, bottom = 0 }
 config.window_decorations = "RESIZE"
 
 -- Tab Bar Styling
 config.use_fancy_tab_bar = false
-config.hide_tab_bar_if_only_one_tab = true
+config.hide_tab_bar_if_only_one_tab = false
 config.show_new_tab_button_in_tab_bar = false
+
+config.window_frame = {
+	-- Steuert die Hintergrundfarbe des Balkens hinter/neben den Tabs
+	active_titlebar_bg = "#ffffff",
+	inactive_titlebar_bg = "#ffffff",
+}
+
 config.colors = {
 	tab_bar = {
 		background = "#ffffff",
+		-- Entfernt die graue Linie/Kante bei inaktiven Tabs
+		inactive_tab_edge = "#ffffff",
+
 		active_tab = { bg_color = "#d9f9ff", fg_color = "#000000", intensity = "Bold" },
 		inactive_tab = { bg_color = "#ffffff", fg_color = "#888888" },
+		-- Auch der "Neue Tab" Button (+) sollte weiß sein
+		new_tab = { bg_color = "#ffffff", fg_color = "#888888" },
 	},
 }
 
@@ -41,6 +51,8 @@ config.keys = {
 	{ key = "F11", action = act.ToggleFullScreen },
 	{ key = "[", mods = "LEADER", action = act.ActivateCopyMode },
 	{ key = "m", mods = "LEADER", action = act.TogglePaneZoomState },
+	-- Füge dies in config.keys ein:
+	{ key = "d", mods = "LEADER", action = act.ShowDebugOverlay },
 
 	-- Splits & Tabs
 	{ key = "v", mods = "LEADER", action = act.SplitVertical({ domain = "CurrentPaneDomain" }) },
@@ -123,6 +135,20 @@ config.key_tables = {
 				end),
 			}),
 		},
+		-- 'd' zum "Löschen" des aktuellen Workspaces (schließt alle Fenster/Tabs)
+		{
+			key = "d",
+			action = wezterm.action_callback(function(window, pane)
+				local current_workspace = window:active_workspace()
+				local all_windows = wezterm.mux.all_windows()
+
+				for _, win in ipairs(all_windows) do
+					if win:get_workspace() == current_workspace then
+						win:gui_window():perform_action(act.QuitApplication, pane)
+					end
+				end
+			end),
+		},
 
 		-- Escape to cancel
 		{ key = "Escape", action = "PopKeyTable" },
@@ -196,9 +222,41 @@ end)
 -- --------------------------------------------------------------------
 -- 5. Startup Events
 -- --------------------------------------------------------------------
+local mux = wezterm.mux
+
 wezterm.on("gui-startup", function(cmd)
-	local _, _, window = wezterm.mux.spawn_window(cmd or {})
-	window:gui_window():toggle_fullscreen()
+	-- allow `wezterm start -- something` to affect what we spawn
+	-- in our initial window
+	local args = {}
+	if cmd then
+		args = cmd.args
+	end
+
+	-- Set a workspace for coding on a current project
+	-- Top pane is for the editor, bottom pane is for the build tool
+	local project_dir = wezterm.home_dir .. "/wezterm"
+	local tab, build_pane, window = mux.spawn_window({
+		workspace = "coding",
+		cwd = project_dir,
+		args = args,
+	})
+
+	-- may as well kick off a build in that pane
+	--	build_pane:send_text("echo hi")
+
+	-- A workspace for interacting with a local machine that
+	-- runs some docker containers for home automation
+	local tab, pane, window = mux.spawn_window({
+		workspace = "automation",
+		args = { "ssh", "vault" },
+	})
+	local gui_window = window:gui_window()
+
+	gui_window:maximize()
+	gui_window:perform_action(wezterm.action.ToggleFullScreen, pane)
+
+	-- We want to startup in the coding workspace
+	mux.set_active_workspace("coding")
 end)
 
 return config
