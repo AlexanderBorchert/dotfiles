@@ -224,39 +224,28 @@ end)
 -- --------------------------------------------------------------------
 local mux = wezterm.mux
 
-wezterm.on("gui-startup", function(cmd)
-	-- allow `wezterm start -- something` to affect what we spawn
-	-- in our initial window
-	local args = {}
-	if cmd then
-		args = cmd.args
-	end
+local start_workspace = "learning vim"
+local start_workspace_dir = wezterm.home_dir .. "/Projects/nvim/code/"
 
-	-- Set a workspace for coding on a current project
-	-- Top pane is for the editor, bottom pane is for the build tool
-	local project_dir = wezterm.home_dir .. "/wezterm"
-	local tab, build_pane, window = mux.spawn_window({
-		workspace = "coding",
-		cwd = project_dir,
-		args = args,
+local workspace_1 = "asm"
+local workspace_1_dir = wezterm.home_dir .. "/Projects/"
+
+wezterm.on("gui-startup", function()
+	local _, start_workspace_pane, start_workspace_window = mux.spawn_window({
+		workspace = start_workspace,
+		cwd = start_workspace_dir,
 	})
 
-	-- may as well kick off a build in that pane
-	--	build_pane:send_text("echo hi")
+	local gui_window = start_workspace_window:gui_window()
 
-	-- A workspace for interacting with a local machine that
-	-- runs some docker containers for home automation
-	local tab, pane, window = mux.spawn_window({
-		workspace = "automation",
-		args = { "ssh", "vault" },
-	})
-	local gui_window = window:gui_window()
-
+	mux.set_active_workspace(start_workspace)
 	gui_window:maximize()
-	gui_window:perform_action(wezterm.action.ToggleFullScreen, pane)
+	gui_window:perform_action(wezterm.action.ToggleFullScreen, start_workspace_pane)
 
-	-- We want to startup in the coding workspace
-	mux.set_active_workspace("coding")
+	local _, _, window_1 = mux.spawn_window({
+		workspace = workspace_1,
+		cwd = workspace_1_dir,
+	})
 end)
 
 return config
