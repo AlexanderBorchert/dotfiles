@@ -219,6 +219,26 @@ wezterm.on("format-tab-title", function(tab)
 	return string.format(" %s %s ", icon, name)
 end)
 
+wezterm.on("update-status", function(window, pane)
+	local workspace = window:active_workspace()
+
+	window:set_right_status(wezterm.format({
+		-- Schlanker Balken links (Trennlinie)
+		{ Foreground = { Color = "#e0e0e0" } },
+		{ Text = "" },
+
+		-- Das Icon in einem kräftigeren Blau
+		{ Foreground = { Color = "#4285f4" } }, -- Google Blue
+		{ Text = wezterm.nerdfonts.oct_project .. " " },
+
+		-- Der Name im Design des aktiven Tabs
+		{ Background = { Color = "#d9f9ff" } },
+		{ Foreground = { Color = "#000000" } },
+		{ Attribute = { Intensity = "Bold" } },
+		{ Text = " " .. workspace .. " " },
+	}))
+end)
+
 -- --------------------------------------------------------------------
 -- 5. Startup Events
 -- --------------------------------------------------------------------
