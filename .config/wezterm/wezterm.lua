@@ -230,6 +230,9 @@ local start_workspace_dir = wezterm.home_dir .. "/Projects/nvim/code/"
 local workspace_1 = "asm"
 local workspace_1_dir = wezterm.home_dir .. "/Projects/"
 
+local workspace_2 = "config"
+local workspace_2_dir = wezterm.home_dir .. "/.dotfiles/"
+
 wezterm.on("gui-startup", function()
 	local _, start_workspace_pane, start_workspace_window = mux.spawn_window({
 		workspace = start_workspace,
@@ -242,9 +245,14 @@ wezterm.on("gui-startup", function()
 	gui_window:maximize()
 	gui_window:perform_action(wezterm.action.ToggleFullScreen, start_workspace_pane)
 
-	local _, _, window_1 = mux.spawn_window({
+	mux.spawn_window({
 		workspace = workspace_1,
 		cwd = workspace_1_dir,
+	})
+
+	mux.spawn_window({
+		workspace = workspace_2,
+		cwd = workspace_2_dir,
 	})
 end)
 
