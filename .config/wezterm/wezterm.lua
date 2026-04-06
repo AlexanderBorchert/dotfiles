@@ -46,7 +46,7 @@ end
 -- --------------------------------------------------------------------
 -- 3. Keybindings
 -- --------------------------------------------------------------------
-config.leader = { key = "Space", mods = "CTRL", timeout_milliseconds = 2000 }
+config.leader = { key = "Space", mods = "CTRL", timeout_milliseconds = 10000 }
 config.keys = {
 	{ key = "F11", action = act.ToggleFullScreen },
 	{ key = "[", mods = "LEADER", action = act.ActivateCopyMode },
@@ -274,50 +274,58 @@ wezterm.on("gui-startup", function()
 	})
 end)
 
-local last_active_table = nil
+-- 1. Intervall verkürzen, damit der Delay präzise geprüft wird (z.B. alle 200ms)
+config.status_update_interval = 1000
 
 wezterm.on("update-status", function(window, pane)
 	local active_table = window:active_key_table()
 	local leader_active = window:leader_is_active()
+	local now = os.time() -- os.time() ist für einfache Sekunden-Checks stabiler
 
-	-- Nur aktualisieren, wenn sich der Status geändert hat
-	if active_table == last_active_table and not leader_active then
-		-- Wir müssen prüfen, ob der Leader gerade erst aktiviert wurde,
-		-- daher lassen wir das return hier etwas lockerer
+	-- Initialisierung des Timers in wezterm.GLOBAL
+	if not wezterm.GLOBAL.leader_started_at then
+		wezterm.GLOBAL.leader_started_at = 0
 	end
-	last_active_table = active_table
 
+	-- LOGIK: Wann wurde der Leader gestartet?
+	if leader_active and wezterm.GLOBAL.last_leader_state == false then
+		wezterm.GLOBAL.leader_started_at = now
+	end
+	wezterm.GLOBAL.last_leader_state = leader_active
+
+	-- Wenn nichts aktiv ist: Status sofort leeren
+	if not leader_active and not active_table then
+		window:set_left_status("")
+		return
+	end
+
+	-- DELAY CHECK:
+	-- Wir zeigen den Leader-Status nur, wenn er seit mindestens 1 Sekunde aktiv ist
+	-- (Hinweis: os.time() hat nur Sekunden-Präzision. Für ms-Präzision müsste man
+	-- wezterm.time.now() nutzen, falls deine Version das unterstützt)
+	if leader_active and (now - wezterm.GLOBAL.leader_started_at < 1) then
+		window:set_left_status("")
+		return
+	end
+
+	-- Anzeige-Logik (wird nur ausgeführt, wenn Delay vorbei oder Key-Table aktiv)
 	local status_text = ""
-	local bg_color = "#333333"
-	local fg_color = "#ffffff"
-
-	-- Logik für die Layer-Anzeige
 	if leader_active then
-		-- LAYER 1: Leader wurde gedrückt, wir warten auf die Wahl des Bereichs
-		bg_color = "#ffa500"
-		fg_color = "#000000"
-		status_text = "  LAYER: [w] Workspaces | [t] Tabs | [p] Panes "
+		status_text = "  LAYER: [w] Workspaces | [t] Tabs "
 	elseif active_table == "workspaces" then
-		-- LAYER 2: Spezifisch für Workspaces
-		bg_color = "#ffeb3b"
-		fg_color = "#000000"
-		status_text = " 🚀 WORKSPACES: [w] Liste | [c] Neu | [r] Name | [d] Kill "
+		status_text = " 🚀 WORKSPACES: [w] Liste | [c] Neu "
 	elseif active_table == "tabs" then
-		-- LAYER 2: Spezifisch für Tabs
-		bg_color = "#4caf50"
-		fg_color = "#ffffff"
-		status_text = " 📑 TABS: [c] Neu | [x] Schließen | [r] Name | [l] Liste "
+		status_text = " 📑 TABS: [c] Neu | [x] Kill "
 	end
 
+	local bg = "#eeeeee" -- Sehr helles, neutrales Grau
+	local fg = "#555555" -- Dezentes Dunkelgrau
 	if status_text ~= "" then
 		window:set_left_status(wezterm.format({
-			{ Background = { Color = bg_color } },
-			{ Foreground = { Color = fg_color } },
-			{ Attribute = { Intensity = "Bold" } },
+			{ Background = { Color = bg } },
+			{ Foreground = { Color = fg } },
 			{ Text = status_text },
 		}))
-	else
-		window:set_left_status("")
 	end
 end)
 
