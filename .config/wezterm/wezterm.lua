@@ -274,4 +274,51 @@ wezterm.on("gui-startup", function()
 	})
 end)
 
+local last_active_table = nil
+
+wezterm.on("update-status", function(window, pane)
+	local active_table = window:active_key_table()
+	local leader_active = window:leader_is_active()
+
+	-- Nur aktualisieren, wenn sich der Status geändert hat
+	if active_table == last_active_table and not leader_active then
+		-- Wir müssen prüfen, ob der Leader gerade erst aktiviert wurde,
+		-- daher lassen wir das return hier etwas lockerer
+	end
+	last_active_table = active_table
+
+	local status_text = ""
+	local bg_color = "#333333"
+	local fg_color = "#ffffff"
+
+	-- Logik für die Layer-Anzeige
+	if leader_active then
+		-- LAYER 1: Leader wurde gedrückt, wir warten auf die Wahl des Bereichs
+		bg_color = "#ffa500"
+		fg_color = "#000000"
+		status_text = "  LAYER: [w] Workspaces | [t] Tabs | [p] Panes "
+	elseif active_table == "workspaces" then
+		-- LAYER 2: Spezifisch für Workspaces
+		bg_color = "#ffeb3b"
+		fg_color = "#000000"
+		status_text = " 🚀 WORKSPACES: [w] Liste | [c] Neu | [r] Name | [d] Kill "
+	elseif active_table == "tabs" then
+		-- LAYER 2: Spezifisch für Tabs
+		bg_color = "#4caf50"
+		fg_color = "#ffffff"
+		status_text = " 📑 TABS: [c] Neu | [x] Schließen | [r] Name | [l] Liste "
+	end
+
+	if status_text ~= "" then
+		window:set_left_status(wezterm.format({
+			{ Background = { Color = bg_color } },
+			{ Foreground = { Color = fg_color } },
+			{ Attribute = { Intensity = "Bold" } },
+			{ Text = status_text },
+		}))
+	else
+		window:set_left_status("")
+	end
+end)
+
 return config
