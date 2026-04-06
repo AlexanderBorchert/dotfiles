@@ -263,8 +263,6 @@ wezterm.on("gui-startup", function()
 
 	mux.set_active_workspace(start_workspace)
 	gui_window:maximize()
-	gui_window:perform_action(wezterm.action.ToggleFullScreen, start_workspace_pane)
-
 	mux.spawn_window({
 		workspace = workspace_1,
 		cwd = workspace_1_dir,
