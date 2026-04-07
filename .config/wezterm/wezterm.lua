@@ -154,16 +154,7 @@ config.key_tables = {
 		{ key = "Escape", action = "PopKeyTable" },
 	},
 	tabs = {
-		-- 'c' to create a new tab
 		{ key = "c", action = act.SpawnTab("CurrentPaneDomain") },
-
-		-- 'x' to close (kill) the current tab
-		{
-			key = "x",
-			action = act.CloseCurrentTab({ confirm = true }),
-		},
-
-		-- 'r' to rename the current tab
 		{
 			key = "r",
 			action = act.PromptInputLine({
@@ -180,10 +171,9 @@ config.key_tables = {
 			}),
 		},
 
-		-- 'l' to list tabs (launcher)
 		{
-			key = "l",
-			action = act.ShowLauncherArgs({ flags = "TABS" }),
+			key = "d",
+			action = act.CloseCurrentTab({ confirm = true }),
 		},
 	},
 }
@@ -213,10 +203,22 @@ local process_icons = {
 }
 
 wezterm.on("format-tab-title", function(tab)
-	local pane = tab.active_pane
-	local name = string.gsub(pane.foreground_process_name, "(.*[/\\\\])(.*)", "%2")
-	local icon = process_icons[name] or wezterm.nerdfonts.cod_terminal
-	return string.format(" %s %s ", icon, name)
+	-- Priorität: 1. Manueller Tab-Titel, 2. Pane-Titel, 3. Prozess-Name
+	local title = tab.tab_title
+	if not title or #title == 0 then
+		title = tab.active_pane.title
+	end
+
+	-- Icon-Suche basierend auf "enthält" (case-insensitive)
+	local icon = wezterm.nerdfonts.cod_terminal -- Standard
+	for name, sym in pairs(process_icons) do
+		if string.find(title:lower(), name:lower(), 1, true) then
+			icon = sym
+			break
+		end
+	end
+
+	return string.format(" %s %s ", icon, title)
 end)
 
 wezterm.on("update-status", function(window, pane)
@@ -311,11 +313,11 @@ wezterm.on("update-status", function(window, pane)
 	-- Anzeige-Logik (wird nur ausgeführt, wenn Delay vorbei oder Key-Table aktiv)
 	local status_text = ""
 	if leader_active then
-		status_text = "  LAYER: [w] Workspaces | [t] Tabs "
+		status_text = "   [w]Workspaces   [t]Tabs/Windows   "
 	elseif active_table == "workspaces" then
-		status_text = " 🚀 WORKSPACES: [w] Liste | [c] Neu "
+		status_text = " 🚀 WORKSPACES:   [w]switch   [c]create   [r]rename   [d]delete   "
 	elseif active_table == "tabs" then
-		status_text = " 📑 TABS: [c] Neu | [x] Kill "
+		status_text = " 📑 Windows:   [w]switch   [c]create   [r]rename   [d]delete   "
 	end
 
 	local bg = "#eeeeee" -- Sehr helles, neutrales Grau
