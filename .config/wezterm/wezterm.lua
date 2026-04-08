@@ -14,6 +14,7 @@ config.window_decorations = "RESIZE"
 config.use_fancy_tab_bar = false
 config.hide_tab_bar_if_only_one_tab = false
 config.show_new_tab_button_in_tab_bar = false
+config.show_tab_index_in_tab_bar = false
 
 config.window_frame = {
 	-- Steuert die Hintergrundfarbe des Balkens hinter/neben den Tabs
@@ -229,32 +230,37 @@ local mux = wezterm.mux
 
 local start_workspace = "learning vim"
 local start_workspace_dir = wezterm.home_dir .. "/Projects/nvim/code/"
+local start_tab_title = "vim"
 
 local workspace_1 = "asm"
-local workspace_1_dir = wezterm.home_dir .. "/Projects/"
+local workspace_1_dir = wezterm.home_dir .. "/Projects/asm/"
+local tab_1_title = "duntemann"
 
 local workspace_2 = "config"
 local workspace_2_dir = wezterm.home_dir .. "/.dotfiles/"
+local tab_2_title = "config"
 
 wezterm.on("gui-startup", function()
-	local _, start_workspace_pane, start_workspace_window = mux.spawn_window({
+	local start_tab, start_workspace_pane, start_workspace_window = mux.spawn_window({
 		workspace = start_workspace,
 		cwd = start_workspace_dir,
 	})
-
 	local gui_window = start_workspace_window:gui_window()
-
 	mux.set_active_workspace(start_workspace)
 	gui_window:maximize()
-	mux.spawn_window({
+	start_tab:set_title(start_tab_title)
+
+	local tab_1, _, _ = mux.spawn_window({
 		workspace = workspace_1,
 		cwd = workspace_1_dir,
 	})
+	tab_1:set_title(tab_1_title)
 
-	mux.spawn_window({
+	local tab_2, _, _ = mux.spawn_window({
 		workspace = workspace_2,
 		cwd = workspace_2_dir,
 	})
+	tab_2:set_title(tab_2_title)
 end)
 
 -- 1. Intervall verkürzen, damit der Delay präzise geprüft wird (z.B. alle 200ms)
