@@ -202,25 +202,6 @@ local process_icons = {
 	["sudo"] = wezterm.nerdfonts.fa_unlock_alt,
 }
 
-wezterm.on("format-tab-title", function(tab)
-	-- Priorität: 1. Manueller Tab-Titel, 2. Pane-Titel, 3. Prozess-Name
-	local title = tab.tab_title
-	if not title or #title == 0 then
-		title = tab.active_pane.title
-	end
-
-	-- Icon-Suche basierend auf "enthält" (case-insensitive)
-	local icon = wezterm.nerdfonts.cod_terminal -- Standard
-	for name, sym in pairs(process_icons) do
-		if string.find(title:lower(), name:lower(), 1, true) then
-			icon = sym
-			break
-		end
-	end
-
-	return string.format(" %s %s ", icon, title)
-end)
-
 wezterm.on("update-status", function(window, pane)
 	local workspace = window:active_workspace()
 
