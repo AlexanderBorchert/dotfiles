@@ -1,0 +1,5 @@
+ gui:
+  theme:
+    # Ändert die Hintergrundfarbe der aktuell ausgewählten Zeile
+    selectedLineBgColor:
+      - '#d1d1d1' # Ein helles Grau für hellen Hintergrund
