@@ -61,12 +61,6 @@ config.keys = {
 	{ key = "p", mods = "LEADER", action = act.ActivateTabRelative(-1) },
 	{ key = "n", mods = "LEADER", action = act.ActivateTabRelative(1) },
 
-	-- Navigation (Ctrl + hjkl)
-	{ key = "h", mods = "CTRL", action = act.ActivatePaneDirection("Left") },
-	{ key = "l", mods = "CTRL", action = act.ActivatePaneDirection("Right") },
-	{ key = "k", mods = "CTRL", action = act.ActivatePaneDirection("Up") },
-	{ key = "j", mods = "CTRL", action = act.ActivatePaneDirection("Down") },
-
 	-- Resizing (Ctrl + Shift + hjkl)
 	{ key = "h", mods = "CTRL|SHIFT", action = act.AdjustPaneSize({ "Left", 5 }) },
 	{ key = "l", mods = "CTRL|SHIFT", action = act.AdjustPaneSize({ "Right", 5 }) },
