@@ -22,14 +22,25 @@ function fish_greeting
     echo "fish started" | set_color cyan
 end
 
+# vim key bindings in fish
+set -g fish_key_bindings fish_vi_key_bindings
+
+function fish_user_key_bindings
+    # Vi-Modus muss explizit aktiviert sein (falls noch nicht geschehen)
+    # fish_vi_key_bindings 
+
+    # Ctrl+L akzeptiert den gesamten Vorschlag im Insert-Modus
+    bind -M insert \cl accept-autosuggestion
+
+    # Optional: Auch im Normal-Modus aktivieren
+    bind -M default \cl accept-autosuggestion
+end
 # zoxide
 zoxide init fish | source
 
 # Created by `pipx` on 2025-12-14 17:34:20
 set -gx PATH $PATH ~/.local/bin
 
-# vim key bindings in fish
-set -g fish_key_bindings fish_vi_key_bindings
 
 # vim as default editor
 set -gx EDITOR nvim
