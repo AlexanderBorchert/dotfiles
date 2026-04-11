@@ -52,7 +52,6 @@ config.keys = {
 	{ key = "F11", action = act.ToggleFullScreen },
 	{ key = "[", mods = "LEADER", action = act.ActivateCopyMode },
 	{ key = "m", mods = "LEADER", action = act.TogglePaneZoomState },
-	-- Füge dies in config.keys ein:
 	{ key = "d", mods = "LEADER", action = act.ShowDebugOverlay },
 
 	-- Splits & Tabs
