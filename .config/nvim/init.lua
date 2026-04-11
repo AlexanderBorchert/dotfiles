@@ -91,7 +91,7 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
 -- See `:help vim.o`
@@ -154,7 +154,7 @@ vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 vim.o.inccommand = 'split'
 
 -- Show which line your cursor is on
-vim.o.cursorline = true
+vim.o.cursorline = false
 
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.o.scrolloff = 10
@@ -963,3 +963,18 @@ require('lazy').setup({
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+--
+--
+--
+-- cursor should not jump to beginning of line
+vim.opt.startofline = false
+-- Erlaubt dem Cursor, sich überall zu bewegen, auch dort, wo kein Text ist
+-- vim.opt.virtualedit = 'all'
+-- Behebt das Springen: Erlaubt dem Cursor in der Spalte zu bleiben,
+-- auch wenn die Zeile dort eigentlich zu Ende ist.
+vim.api.nvim_create_autocmd('BufEnter', {
+  callback = function()
+    -- Nur in echten Dateien aktivieren, nicht in Lazy/Mason/etc.
+    if vim.bo.buftype == '' then vim.opt_local.virtualedit = 'all' end
+  end,
+})
