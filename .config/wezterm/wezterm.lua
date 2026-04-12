@@ -1,6 +1,8 @@
 local wezterm = require("wezterm")
-local act = wezterm.action
+local action = wezterm.action
 local config = wezterm.config_builder()
+local mux = wezterm.mux
+local homedir = wezterm.home_dir
 
 -- --------------------------------------------------------------------
 -- 1. General & UI Settings
@@ -15,6 +17,7 @@ config.use_fancy_tab_bar = false
 config.hide_tab_bar_if_only_one_tab = false
 config.show_new_tab_button_in_tab_bar = false
 config.show_tab_index_in_tab_bar = false
+config.tab_max_width = 32 -- Standard ist 16, hier auf 32 erhöht
 
 config.window_frame = {
 	-- Steuert die Hintergrundfarbe des Balkens hinter/neben den Tabs
@@ -49,28 +52,27 @@ end
 -- --------------------------------------------------------------------
 config.leader = { key = "Space", mods = "CTRL", timeout_milliseconds = 10000 }
 config.keys = {
-	{ key = "F11", action = act.ToggleFullScreen },
-	{ key = "[", mods = "LEADER", action = act.ActivateCopyMode },
-	{ key = "m", mods = "LEADER", action = act.TogglePaneZoomState },
-	{ key = "d", mods = "LEADER", action = act.ShowDebugOverlay },
+	{ key = "F11", action = action.ToggleFullScreen },
+	{ key = "[", mods = "LEADER", action = action.ActivateCopyMode },
+	{ key = "d", mods = "LEADER", action = action.ShowDebugOverlay },
 
 	-- Splits & Tabs
-	{ key = "v", mods = "LEADER", action = act.SplitVertical({ domain = "CurrentPaneDomain" }) },
-	{ key = "h", mods = "LEADER", action = act.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
-	{ key = "c", mods = "LEADER", action = act.SpawnTab("CurrentPaneDomain") },
-	{ key = "p", mods = "LEADER", action = act.ActivateTabRelative(-1) },
-	{ key = "n", mods = "LEADER", action = act.ActivateTabRelative(1) },
+	{ key = "v", mods = "LEADER", action = action.SplitVertical({ domain = "CurrentPaneDomain" }) },
+	{ key = "h", mods = "LEADER", action = action.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
+	{ key = "c", mods = "LEADER", action = action.SpawnTab("CurrentPaneDomain") },
+	{ key = "p", mods = "LEADER", action = action.ActivateTabRelative(-1) },
+	{ key = "n", mods = "LEADER", action = action.ActivateTabRelative(1) },
 
 	-- Resizing (Ctrl + Shift + hjkl)
-	{ key = "h", mods = "CTRL|SHIFT", action = act.AdjustPaneSize({ "Left", 5 }) },
-	{ key = "l", mods = "CTRL|SHIFT", action = act.AdjustPaneSize({ "Right", 5 }) },
-	{ key = "j", mods = "CTRL|SHIFT", action = act.AdjustPaneSize({ "Down", 5 }) },
-	{ key = "k", mods = "CTRL|SHIFT", action = act.AdjustPaneSize({ "Up", 5 }) },
+	{ key = "h", mods = "CTRL|SHIFT", action = action.AdjustPaneSize({ "Left", 5 }) },
+	{ key = "l", mods = "CTRL|SHIFT", action = action.AdjustPaneSize({ "Right", 5 }) },
+	{ key = "j", mods = "CTRL|SHIFT", action = action.AdjustPaneSize({ "Down", 5 }) },
+	{ key = "k", mods = "CTRL|SHIFT", action = action.AdjustPaneSize({ "Up", 5 }) },
 
 	{
 		key = "w",
 		mods = "LEADER",
-		action = act.ActivateKeyTable({
+		action = action.ActivateKeyTable({
 			name = "workspaces",
 			one_shot = true, -- Automatically exit table after one action
 		}),
@@ -78,7 +80,7 @@ config.keys = {
 	{
 		key = "t",
 		mods = "LEADER",
-		action = act.ActivateKeyTable({
+		action = action.ActivateKeyTable({
 			name = "tabs",
 			one_shot = true,
 		}),
@@ -90,7 +92,7 @@ config.key_tables = {
 		-- 'w' to view/switch workspaces
 		{
 			key = "w",
-			action = act.ShowLauncherArgs({
+			action = action.ShowLauncherArgs({
 				flags = "WORKSPACES",
 				title = "🚀 Workspace auswählen",
 				help_text = "",
@@ -99,7 +101,7 @@ config.key_tables = {
 		-- 'c' to create a new workspace
 		{
 			key = "c",
-			action = act.PromptInputLine({
+			action = action.PromptInputLine({
 				description = wezterm.format({
 					{ Attribute = { Intensity = "Bold" } },
 					{ Foreground = { AnsiColor = "Fuchsia" } },
@@ -107,7 +109,7 @@ config.key_tables = {
 				}),
 				action = wezterm.action_callback(function(window, pane, line)
 					if line then
-						window:perform_action(act.SwitchToWorkspace({ name = line }), pane)
+						window:perform_action(action.SwitchToWorkspace({ name = line }), pane)
 					end
 				end),
 			}),
@@ -116,7 +118,7 @@ config.key_tables = {
 		-- 'r' to rename current workspace
 		{
 			key = "r",
-			action = act.PromptInputLine({
+			action = action.PromptInputLine({
 				description = wezterm.format({
 					{ Attribute = { Intensity = "Bold" } },
 					{ Foreground = { AnsiColor = "Aqua" } },
@@ -138,7 +140,7 @@ config.key_tables = {
 
 				for _, win in ipairs(all_windows) do
 					if win:get_workspace() == current_workspace then
-						win:gui_window():perform_action(act.QuitApplication, pane)
+						win:gui_window():perform_action(action.QuitApplication, pane)
 					end
 				end
 			end),
@@ -148,10 +150,10 @@ config.key_tables = {
 		{ key = "Escape", action = "PopKeyTable" },
 	},
 	tabs = {
-		{ key = "c", action = act.SpawnTab("CurrentPaneDomain") },
+		{ key = "c", action = action.SpawnTab("CurrentPaneDomain") },
 		{
 			key = "r",
-			action = act.PromptInputLine({
+			action = action.PromptInputLine({
 				description = wezterm.format({
 					{ Attribute = { Intensity = "Bold" } },
 					{ Foreground = { AnsiColor = "Yellow" } },
@@ -167,7 +169,7 @@ config.key_tables = {
 
 		{
 			key = "d",
-			action = act.CloseCurrentTab({ confirm = true }),
+			action = action.CloseCurrentTab({ confirm = true }),
 		},
 	},
 }
@@ -177,7 +179,7 @@ for i = 1, 9 do
 	table.insert(config.keys, {
 		key = tostring(i),
 		mods = "LEADER",
-		action = act.ActivateTab(i - 1),
+		action = action.ActivateTab(i - 1),
 	})
 end
 
@@ -193,8 +195,31 @@ local process_icons = {
 	["python"] = wezterm.nerdfonts.dev_python,
 	["git"] = wezterm.nerdfonts.dev_git,
 	["ssh"] = wezterm.nerdfonts.fa_server,
-	["sudo"] = wezterm.nerdfonts.fa_unlock_alt,
+	["wezterm"] = "𝕎",
+	["asm"] = wezterm.nerdfonts.md_cpu_64_bit,
 }
+
+wezterm.on("format-tab-title", function(tab, tabs, panes, config, hover, max_width)
+	-- Nutze den Titel, den du via set_title vergeben hast
+	local title = tab.tab_title
+	if not title or #title == 0 then
+		title = tab.active_pane.title
+	end
+
+	-- Icon nur suchen, wenn das Wort im Titel vorkommt
+	local icon = ""
+	for name, sym in pairs(process_icons) do
+		if title:lower():find(name) then
+			icon = sym .. " "
+			break
+		end
+	end
+
+	-- Das gewünschte Padding: 2 Leerzeichen links und rechts
+	return {
+		{ Text = "  " .. icon .. title .. "  " },
+	}
+end)
 
 wezterm.on("update-status", function(window, pane)
 	local workspace = window:active_workspace()
@@ -219,45 +244,40 @@ end)
 -- --------------------------------------------------------------------
 -- 5. Startup Events
 -- --------------------------------------------------------------------
-local mux = wezterm.mux
-
-local start_workspace = "learning vim"
-local start_workspace_dir = wezterm.home_dir .. "/Projects/nvim/code/"
-local start_tab_title = "vim"
-
-local workspace_1 = "asm"
-local workspace_1_dir = wezterm.home_dir .. "/Projects/asm/"
-local tab_1_title = "duntemann"
-
-local workspace_2 = "config"
-local workspace_2_dir = wezterm.home_dir .. "/.dotfiles/"
-local tab_2_title = "config"
 
 wezterm.on("gui-startup", function()
-	local start_tab, start_workspace_pane, start_workspace_window = mux.spawn_window({
-		workspace = start_workspace,
-		cwd = start_workspace_dir,
+	-- Workspace learning vim
+	local ws_learning_vim = "learning vim"
+	local learning_vim_tab, _, learning_vim_window = mux.spawn_window({
+		workspace = ws_learning_vim,
+		cwd = homedir .. "/Projects/nvim/code/",
 	})
-	local gui_window = start_workspace_window:gui_window()
-	mux.set_active_workspace(start_workspace)
-	gui_window:maximize()
-	start_tab:set_title(start_tab_title)
+	mux.set_active_workspace(ws_learning_vim)
+	learning_vim_window:gui_window():maximize()
+	learning_vim_tab:set_title("vim")
+	-- Workspace learning assembler
+	local learning_asm_tab, _, _ = mux.spawn_window({
+		workspace = "asm",
+		cwd = homedir .. "/Projects/asm/",
+	})
+	learning_asm_tab:set_title("duntemann asm")
 
-	local tab_1, _, _ = mux.spawn_window({
-		workspace = workspace_1,
-		cwd = workspace_1_dir,
+	-- Workspace configs
+	local dotfiles_dir = homedir .. "/.dotfiles/"
+	local wezterm_tab, _, configs_window = mux.spawn_window({
+		workspace = "configs",
+		cwd = dotfiles_dir,
+		args = { "nvim", ".config/wezterm/wezterm.lua" },
 	})
-	tab_1:set_title(tab_1_title)
-
-	local tab_2, _, _ = mux.spawn_window({
-		workspace = workspace_2,
-		cwd = workspace_2_dir,
-	})
-	tab_2:set_title(tab_2_title)
+	wezterm_tab:set_title("wezterm")
+	nvim_tab = configs_window:spawn_tab({ args = { "nvim", ".config/nvim/init.lua" } })
+	nvim_tab:set_title("nvim")
+	git_stow_tab = configs_window:spawn_tab({ cwd = dotfiles_dir })
+	git_stow_tab:set_title("git stow")
 end)
 
 -- 1. Intervall verkürzen, damit der Delay präzise geprüft wird (z.B. alle 200ms)
-config.status_update_interval = 1000
+config.status_update_interval = 3000
 
 wezterm.on("update-status", function(window, pane)
 	local active_table = window:active_key_table()
