@@ -311,7 +311,7 @@ require('lazy').setup({
     ---@diagnostic disable-next-line: missing-fields
     opts = {
       -- delay between pressing a key and opening which-key (milliseconds)
-      delay = 0,
+      delay = 200,
       icons = { mappings = vim.g.have_nerd_font },
 
       -- Document existing key chains
@@ -978,3 +978,6 @@ vim.api.nvim_create_autocmd('BufEnter', {
     if vim.bo.buftype == '' then vim.opt_local.virtualedit = 'all' end
   end,
 })
+
+-- Exit insert mode by typing 'jj' quickly
+vim.keymap.set('i', 'jj', '<Esc>', { desc = 'Exit insert mode' })
