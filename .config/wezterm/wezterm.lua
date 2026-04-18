@@ -197,6 +197,7 @@ local process_icons = {
 	["ssh"] = wezterm.nerdfonts.fa_server,
 	["wezterm"] = "𝕎",
 	["asm"] = wezterm.nerdfonts.md_cpu_64_bit,
+	["other"] = wezterm.nerdfonts.cod_terminal,
 }
 
 wezterm.on("format-tab-title", function(tab, tabs, panes, config, hover, max_width)
@@ -247,33 +248,55 @@ end)
 
 wezterm.on("gui-startup", function()
 	-- Workspace learning vim
-	local ws_learning_vim = "learning vim"
-	local learning_vim_tab, _, learning_vim_window = mux.spawn_window({
-		workspace = ws_learning_vim,
-		cwd = homedir .. "/Projects/nvim/code/",
+	local learning_vim_ws_name = "learning vim"
+	local learning_vim_dir = homedir .. "/Projects/asm/"
+	local learning_vim_tab, learning_vim_pane, learning_vim_window = mux.spawn_window({
+		workspace = learning_vim_ws_name,
+		cwd = homedir .. learning_vim_dir,
 	})
-	mux.set_active_workspace(ws_learning_vim)
-	learning_vim_window:gui_window():maximize()
 	learning_vim_tab:set_title("vim")
+	local other_tab = learning_vim_window:spawn_tab({ cwd = learning_vim_dir })
+	other_tab:set_title("other")
+	learning_vim_tab:activate()
+
 	-- Workspace learning assembler
-	local learning_asm_tab, _, _ = mux.spawn_window({
-		workspace = "asm",
-		cwd = homedir .. "/Projects/asm/",
+	local learning_asm_ws_name = "asm"
+	local learning_asm_dir = homedir .. "/Projects/asm/"
+	local learning_asm_tab, _, learning_asm_window = mux.spawn_window({
+		workspace = learning_asm_ws_name,
+		cwd = learning_asm_dir,
 	})
 	learning_asm_tab:set_title("duntemann asm")
+	local git_other_tab = learning_asm_window:spawn_tab({ cwd = learning_asm_dir })
+	git_other_tab:set_title("other")
+	learning_asm_tab:activate()
 
 	-- Workspace configs
-	local dotfiles_dir = homedir .. "/.dotfiles/"
+	local dotfiles_dir = homedir .. "/.dotfiles"
+	local wezterm_dir = dotfiles_dir .. "/.config/wezterm"
+	local nvim_dir = dotfiles_dir .. "/.config/nvim"
 	local wezterm_tab, _, configs_window = mux.spawn_window({
 		workspace = "configs",
-		cwd = dotfiles_dir,
-		args = { "nvim", ".config/wezterm/wezterm.lua" },
+		cwd = wezterm_dir,
+		-- args = { "nvim", ".config/wezterm/wezterm.lua" },
+		args = { "fish", "-c", "nvim wezterm.lua; exec fish" },
 	})
 	wezterm_tab:set_title("wezterm")
-	nvim_tab = configs_window:spawn_tab({ args = { "nvim", ".config/nvim/init.lua" } })
+	local nvim_tab = configs_window:spawn_tab({
+		cwd = dotfiles_dir,
+		args = { "fish", "-c", "cd " .. nvim_dir .. "; nvim init.lua; exec fish" },
+	})
 	nvim_tab:set_title("nvim")
-	git_stow_tab = configs_window:spawn_tab({ cwd = dotfiles_dir })
+	local git_stow_tab = configs_window:spawn_tab({ cwd = dotfiles_dir })
 	git_stow_tab:set_title("git stow")
+	git_stow_tab = configs_window:spawn_tab({ cwd = dotfiles_dir })
+	git_stow_tab:set_title("other")
+	wezterm_tab:activate()
+
+	mux.set_active_workspace(learning_vim_ws_name)
+
+	-- wezterm.sleep_ms(50)
+	learning_vim_window:gui_window():perform_action(wezterm.action.ToggleFullScreen, learning_vim_pane)
 end)
 
 -- 1. Intervall verkürzen, damit der Delay präzise geprüft wird (z.B. alle 200ms)
