@@ -294,9 +294,6 @@ wezterm.on("gui-startup", function()
 	wezterm_tab:activate()
 
 	mux.set_active_workspace(learning_vim_ws_name)
-
-	-- wezterm.sleep_ms(50)
-	learning_vim_window:gui_window():perform_action(wezterm.action.ToggleFullScreen, learning_vim_pane)
 end)
 
 -- 1. Intervall verkürzen, damit der Delay präzise geprüft wird (z.B. alle 200ms)
