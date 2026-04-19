@@ -254,10 +254,10 @@ end)
 wezterm.on("gui-startup", function()
 	-- Workspace learning vim
 	local learning_vim_ws_name = "learning vim"
-	local learning_vim_dir = homedir .. "/Projects/asm/"
+	local learning_vim_dir = homedir .. "/Projects/nvim/code/"
 	local learning_vim_tab, learning_vim_pane, learning_vim_window = mux.spawn_window({
 		workspace = learning_vim_ws_name,
-		cwd = homedir .. learning_vim_dir,
+		cwd = learning_vim_dir,
 	})
 	learning_vim_tab:set_title("vim")
 	local other_tab = learning_vim_window:spawn_tab({ cwd = learning_vim_dir })
