@@ -54,6 +54,11 @@ config.leader = { key = "Space", mods = "CTRL", timeout_milliseconds = 10000 }
 config.keys = {
 	{ key = "F11", action = action.ToggleFullScreen },
 	{ key = "[", mods = "LEADER", action = action.ActivateCopyMode },
+	{
+		key = "q",
+		mods = "LEADER",
+		action = wezterm.action.QuitApplication,
+	},
 	{ key = "d", mods = "LEADER", action = action.ShowDebugOverlay },
 
 	-- Splits & Tabs
