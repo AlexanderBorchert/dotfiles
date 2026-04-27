@@ -222,6 +222,8 @@ local process_icons = {
 	["ssh"] = wezterm.nerdfonts.fa_server,
 	["wezterm"] = "𝕎",
 	["asm"] = wezterm.nerdfonts.md_cpu_64_bit,
+	["source"] = wezterm.nerdfonts.cod_code,
+	["bug"] = wezterm.nerdfonts.cod_debug_alt,
 	["other"] = wezterm.nerdfonts.cod_terminal,
 }
 
