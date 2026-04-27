@@ -298,6 +298,28 @@ wezterm.on("gui-startup", function()
 	git_stow_tab:set_title("other")
 	wezterm_tab:activate()
 
+	-- Workspace other
+	local other_ws_name = "other"
+	local other_dir = homedir
+	local other_tab, other_pane, other_window = mux.spawn_window({
+		workspace = other_ws_name,
+		cwd = other_dir,
+	})
+	other_tab:set_title("other")
+
+	-- Workspace learning assembler
+	local learning_azure_ws_name = "learning azure"
+	local learning_azure_dir = homedir .. "/Projects/learning_azure/"
+	local learning_azure_tab, _, learning_azure_window = mux.spawn_window({
+		workspace = learning_azure_ws_name,
+		cwd = learning_azure_dir,
+	})
+	learning_azure_tab:set_title("azure cli")
+	local git_other_tab = learning_azure_window:spawn_tab({ cwd = learning_azure_dir })
+	git_other_tab:set_title("other")
+	learning_azure_tab:activate()
+
+	-- choose start workspace
 	mux.set_active_workspace(learning_vim_ws_name)
 end)
 
