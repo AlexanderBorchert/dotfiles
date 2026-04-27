@@ -97,12 +97,32 @@ config.key_tables = {
 		-- 'w' to view/switch workspaces
 		{
 			key = "w",
-			action = action.ShowLauncherArgs({
-				flags = "WORKSPACES",
-				title = "🚀 Workspace auswählen",
-				help_text = "",
-			}),
+			-- Wir nutzen einen callback, um die Liste der Workspaces jedes Mal frisch zu laden
+			action = wezterm.action_callback(function(window, pane)
+				local workspaces = {}
+				-- Holt alle Namen der aktuell existierenden Workspaces
+				for _, name in ipairs(wezterm.mux.get_workspace_names()) do
+					table.insert(workspaces, { label = name, id = name })
+				end
+
+				window:perform_action(
+					wezterm.action.InputSelector({
+						title = "🚀 Workspace auswählen",
+						choices = workspaces,
+						fuzzy = true, -- Startet direkt im Suchmodus
+						-- Was passiert, wenn du einen Workspace auswählst:
+						action = wezterm.action_callback(function(inner_window, inner_pane, id, label)
+							if not id then
+								return
+							end -- Abbrechen, falls nichts gewählt wurde
+							inner_window:perform_action(wezterm.action.SwitchToWorkspace({ name = id }), inner_pane)
+						end),
+					}),
+					pane
+				)
+			end),
 		},
+
 		-- 'c' to create a new workspace
 		{
 			key = "c",
