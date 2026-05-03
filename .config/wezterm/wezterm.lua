@@ -65,26 +65,10 @@ config.keys = {
 	{ key = "v", mods = "LEADER", action = action.SplitVertical({ domain = "CurrentPaneDomain" }) },
 	{ key = "h", mods = "LEADER", action = action.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
 	{ key = "c", mods = "LEADER", action = action.SpawnTab("CurrentPaneDomain") },
-	-- { key = "h", mods = "SHIFT", action = action.ActivateTabRelative(-1) },
-	-- { key = "l", mods = "SHIFT", action = action.ActivateTabRelative(1) },
-	-- { key = "h", mods = "CTR", action = action.ActivatePaneDirection("Left") },
-	-- { key = "l", mods = "SHIFT", action = action.ActivatePaneDirection("Right") },
-	--
-	--
-	-- {
-	-- 	key = "h",
-	-- 	mods = "CTRL",
-	-- 	action = wezterm.action_callback(function(window, pane)
-	-- 		local tab = pane:tab()
-	-- 		-- Prüfen, ob links ein Pane existiert
-	-- 		if tab:get_pane_direction("Left") then
-	-- 			-- Wenn ja: Wechsel zum Pane links
-	-- 			window:perform_action(action.ActivatePaneDirection("Left"), pane)
-	-- 		else
-	-- 			window:perform_action(action.ActivateTabRelative(-1))
-	-- 		end
-	-- 	end),
-	-- },
+
+	{ key = "h", mods = "CTRL|SHIFT", action = action.MoveTabRelative(-1) },
+	-- Tab nach rechts schieben
+	{ key = "l", mods = "CTRL|SHIFT", action = action.MoveTabRelative(1) },
 
 	{
 		key = "h",
@@ -136,6 +120,7 @@ config.keys = {
 }
 
 config.key_tables = {
+
 	workspaces = {
 		-- 'w' to view/switch workspaces
 		{
