@@ -65,14 +65,57 @@ config.keys = {
 	{ key = "v", mods = "LEADER", action = action.SplitVertical({ domain = "CurrentPaneDomain" }) },
 	{ key = "h", mods = "LEADER", action = action.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
 	{ key = "c", mods = "LEADER", action = action.SpawnTab("CurrentPaneDomain") },
-	{ key = "p", mods = "LEADER", action = action.ActivateTabRelative(-1) },
-	{ key = "n", mods = "LEADER", action = action.ActivateTabRelative(1) },
+	-- { key = "h", mods = "SHIFT", action = action.ActivateTabRelative(-1) },
+	-- { key = "l", mods = "SHIFT", action = action.ActivateTabRelative(1) },
+	-- { key = "h", mods = "CTR", action = action.ActivatePaneDirection("Left") },
+	-- { key = "l", mods = "SHIFT", action = action.ActivatePaneDirection("Right") },
+	--
+	--
+	-- {
+	-- 	key = "h",
+	-- 	mods = "CTRL",
+	-- 	action = wezterm.action_callback(function(window, pane)
+	-- 		local tab = pane:tab()
+	-- 		-- Prüfen, ob links ein Pane existiert
+	-- 		if tab:get_pane_direction("Left") then
+	-- 			-- Wenn ja: Wechsel zum Pane links
+	-- 			window:perform_action(action.ActivatePaneDirection("Left"), pane)
+	-- 		else
+	-- 			window:perform_action(action.ActivateTabRelative(-1))
+	-- 		end
+	-- 	end),
+	-- },
 
-	-- Resizing (Ctrl + Shift + hjkl)
-	{ key = "h", mods = "CTRL|SHIFT", action = action.AdjustPaneSize({ "Left", 5 }) },
-	{ key = "l", mods = "CTRL|SHIFT", action = action.AdjustPaneSize({ "Right", 5 }) },
-	{ key = "j", mods = "CTRL|SHIFT", action = action.AdjustPaneSize({ "Down", 5 }) },
-	{ key = "k", mods = "CTRL|SHIFT", action = action.AdjustPaneSize({ "Up", 5 }) },
+	{
+		key = "h",
+		mods = "CTRL",
+		action = wezterm.action_callback(function(window, pane)
+			local tab = pane:tab()
+			local next_pane = tab:get_pane_direction("Left")
+
+			if next_pane ~= nil then
+				window:perform_action(action.ActivatePaneDirection("Left"), pane)
+			else
+				-- Tab wechseln (Wichtig: pane als Kontext mitgeben)
+				window:perform_action(action.ActivateTabRelative(-1), pane)
+			end
+		end),
+	},
+	{
+		key = "l",
+		mods = "CTRL",
+		action = wezterm.action_callback(function(window, pane)
+			local tab = pane:tab()
+			local next_pane = tab:get_pane_direction("Right")
+
+			if next_pane ~= nil then
+				window:perform_action(action.ActivatePaneDirection("Right"), pane)
+			else
+				-- Tab wechseln (Wichtig: pane als Kontext mitgeben)
+				window:perform_action(action.ActivateTabRelative(1), pane)
+			end
+		end),
+	},
 
 	{
 		key = "w",
