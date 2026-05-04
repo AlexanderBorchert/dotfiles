@@ -612,6 +612,7 @@ require('lazy').setup({
         -- ts_ls = {},
 
         stylua = {}, -- Used to format Lua code
+        bicep = {},
 
         -- Special Lua Config, as recommended by neovim help docs
         lua_ls = {
