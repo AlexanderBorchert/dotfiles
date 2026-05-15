@@ -982,3 +982,13 @@ vim.api.nvim_create_autocmd('BufEnter', {
 
 -- Exit insert mode by typing 'jj' quickly
 vim.keymap.set('i', 'jj', '<Esc>', { desc = 'Exit insert mode' })
+
+-- Add this to your init.lua
+vim.filetype.add {
+  extension = {
+    bicep = 'bicep',
+  },
+}
+
+-- Force enable the bicep config for the filetype
+vim.lsp.enable 'bicep'
