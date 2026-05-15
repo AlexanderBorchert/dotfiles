@@ -259,7 +259,7 @@ wezterm.on("format-tab-title", function(tab, tabs, panes, config, hover, max_wid
 	-- Nutze den Titel, den du via set_title vergeben hast
 	local title = tab.tab_title
 	if not title or #title == 0 then
-		title = tab.active_pane.title
+		title = "no name"
 	end
 
 	-- Icon nur suchen, wenn das Wort im Titel vorkommt
