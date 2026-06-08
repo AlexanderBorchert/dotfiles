@@ -326,6 +326,18 @@ wezterm.on("gui-startup", function()
 	git_other_tab:set_title("other")
 	learning_asm_tab:activate()
 
+	-- Workspace learning C
+	local learning_c_ws_name = "C"
+	local learning_c_dir = homedir .. "/Projects/C/KR_book"
+	local learning_c_tab, _, learning_c_window = mux.spawn_window({
+		workspace = learning_c_ws_name,
+		cwd = learning_c_dir,
+	})
+	learning_c_tab:set_title("K&R")
+	local git_other_tab = learning_c_window:spawn_tab({ cwd = learning_c_dir })
+	git_other_tab:set_title("other")
+	learning_c_tab:activate()
+
 	-- Workspace configs
 	local dotfiles_dir = homedir .. "/.dotfiles"
 	local wezterm_dir = dotfiles_dir .. "/.config/wezterm"
@@ -357,7 +369,7 @@ wezterm.on("gui-startup", function()
 	})
 	other_tab:set_title("other")
 
-	-- Workspace learning assembler
+	-- Workspace learning azure
 	local learning_azure_ws_name = "learning azure"
 	local learning_azure_dir = homedir .. "/Projects/learning_azure/"
 	local learning_azure_tab, _, learning_azure_window = mux.spawn_window({
