@@ -5,7 +5,15 @@ fish_add_path ~/bin
 fish_add_path /opt/nvim-linux-x86_64/bin
 
 if status is-interactive
-    # Commands to run in interactive sessions can go here
+    # 1. Tell fish to use Vi key bindings globally
+    set -g fish_key_bindings fish_vi_key_bindings
+
+    # 2. Define the user key bindings function
+    function fish_user_key_bindings
+        # These will override the defaults safely
+        bind -M default k up-or-search
+        bind -M default j down-or-search
+    end
 end
 
 # yazi
@@ -23,7 +31,6 @@ function fish_greeting
 end
 
 # vim key bindings in fish
-set -g fish_key_bindings fish_vi_key_bindings
 
 
 function fish_user_key_bindings
