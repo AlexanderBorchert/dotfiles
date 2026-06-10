@@ -995,3 +995,83 @@ vim.filetype.add {
 
 -- Force enable the bicep config for the filetype
 vim.lsp.enable 'bicep'
+
+-- Force enable the bicep config for the filetype
+vim.lsp.enable 'bicep'
+
+local function debug_wezterm()
+  -- 1. Änderungen speichern und Projekt bauen
+  vim.cmd 'write'
+  local obj = vim.system({ 'make' }):wait()
+
+  -- Optional: Falls make fehlschlägt, den Debugger gar nicht erst starten
+  if obj.code ~= 0 then
+    vim.notify('Kompilierung fehlgeschlagen!', vim.log.levels.ERROR)
+    return
+  end
+
+  -- 2. ID des rechten WezTerm-Panes ermitteln
+  local pane_id_raw = vim.fn.system 'wezterm cli get-pane-direction right'
+  local pane_id = string.gsub(pane_id_raw, '%s+', '') -- Whitespaces entfernen
+
+  -- Falls kein rechtes Pane existiert, erzeugen wir eines
+  if pane_id == '' then
+    -- Erstellt ein neues Pane rechts (nutzt standardmäßig 50% der Breite)
+    local new_pane_raw = vim.fn.system 'wezterm cli split-pane --right'
+    pane_id = string.gsub(new_pane_raw, '%s+', '')
+
+    if pane_id == '' then return end
+
+    -- Da das Pane brandneu ist, läuft dort garantiert noch kein GDB
+    local cmd_raw = vim.fn.system 'make -s debug-cmd'
+    local cmd = string.gsub(cmd_raw, '[\r\n]+$', '')
+
+    if cmd ~= '' then
+      local final_cmd = cmd .. ' -ex start'
+      vim.fn.system(string.format("wezterm cli send-text --pane-id %s --no-paste '%s\r'", pane_id, final_cmd))
+    end
+    vim.fn.system 'wezterm cli activate-pane-direction right'
+    return -- <-- FIX 1: Beendet die Funktion NUR, wenn das Pane neu erstellt wurde
+  end
+
+  -- 3. WezTerm-Panes als JSON abfragen (wenn das Pane bereits existierte)
+  local json_raw = vim.fn.system 'wezterm cli list --format json'
+  local ok, panes = pcall(vim.json.decode, json_raw)
+
+  if not ok or not panes then return end
+
+  -- 4. Vorhandenes Pane in der Liste suchen und Titel prüfen
+  local gdb_running = false
+  for _, pane in ipairs(panes) do
+    if tostring(pane.pane_id) == pane_id then
+      if string.find(string.lower(pane.title), 'gdb') then gdb_running = true end
+      break
+    end
+  end
+
+  -- 5. Befehl an das existierende Pane senden
+  if gdb_running then
+    -- Signal senden (Ctrl+C), um laufenden Prozess zu stoppen, falls GDB aktiv ist
+    vim.fn.system(string.format("wezterm cli send-text --pane-id %s --no-paste '\x03'", pane_id))
+
+    -- GDB läuft bereits -> Neustart mit 'start'
+    vim.fn.system(string.format("wezterm cli send-text --pane-id %s --no-paste 'start\r'", pane_id))
+  else
+    -- GDB läuft nicht -> Debug-Befehl aus 'make' holen und starten
+    local cmd_raw = vim.fn.system 'make -s debug-cmd'
+    local cmd = string.gsub(cmd_raw, '[\r\n]+$', '')
+
+    if cmd ~= '' then
+      local final_cmd = cmd .. ' -ex start'
+      vim.fn.system(string.format("wezterm cli send-text --pane-id %s --no-paste '%s\r'", pane_id, final_cmd))
+    else
+      print "Fehler: 'make -s debug-cmd' hat keinen Befehl zurückgegeben."
+    end
+  end
+
+  -- Am Ende den Fokus auf das rechte WezTerm-Pane (Debug-Pane) setzen
+  vim.fn.system 'wezterm cli activate-pane-direction right'
+end -- <-- FIX 2: Hier schließt die Funktion jetzt korrekt ab
+
+-- Keymap auf <leader>d legen
+vim.keymap.set('n', '<leader>d', debug_wezterm, { desc = 'Start/Restart GDB in right WezTerm pane', silent = true })
