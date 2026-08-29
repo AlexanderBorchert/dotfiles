@@ -8,6 +8,7 @@ local M = {}
 local process_icons = {
 	["bash"] = wezterm.nerdfonts.cod_terminal_bash,
 	["zsh"] = wezterm.nerdfonts.dev_terminal,
+	["fish"] = wezterm.nerdfonts.md_fish,
 	["nvim"] = wezterm.nerdfonts.custom_neovim,
 	["vim"] = wezterm.nerdfonts.dev_vim,
 	["node"] = wezterm.nerdfonts.mdi_nodejs,
@@ -25,6 +26,7 @@ function M.apply(config)
 	-- Allgemeine UI Settings
 	config.color_scheme = "Google Light (base16)"
 	config.font = wezterm.font("JetBrainsMono Nerd Font")
+	config.inactive_pane_hsb = { saturation = 0.98, brightness = 0.95 }
 	config.window_padding = { left = 0, right = 0, top = 0, bottom = 0 }
 	config.window_decorations = "RESIZE"
 	config.status_update_interval = 3000
