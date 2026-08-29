@@ -16,18 +16,38 @@ if status is-interactive
     end
 end
 
-# yazi
 function y
-    set tmp (mktemp -t "yazi-cwd.XXXXXX")
-    yazi $argv --cwd-file="$tmp"
-    if read -z cwd <"$tmp"; and test -n "$cwd"; and test "$cwd" != "$PWD"
-        cd "$cwd"
-    end
-    rm -f -- "$tmp"
-end
+    set -l tmp (mktemp -t "yazi-cwd.XXXXXX")
+    set -l cho (mktemp -t "yazi-cho.XXXXXX")
 
-function fish_greeting
-    echo "fish started" | set_color cyan
+    # Startet Yazi
+    yazi $argv --cwd-file="$tmp" --chooser-file="$cho"
+
+    # Fall 1: Eine Datei wurde mit Enter ausgewählt
+    if test -f "$cho"; and test -s "$cho"
+        set -l opened_file (cat -- "$cho" | head -n 1)
+        # Ermittle den Ordner, in dem die Datei liegt
+        set -l file_dir (dirname -- "$opened_file")
+        
+        # 1. Wechsle sofort in den Ordner der Datei
+        if test -n "$file_dir"; and test "$file_dir" != "$PWD"
+            cd "$file_dir"
+        end
+        
+        # 2. Lösche die temporären Dateien, da Yazi bereits zu ist
+        rm -f -- "$tmp" "$cho"
+        
+        # 3. Starte nvim ganz normal (OHNE exec). 
+        # Die Shell wartet im Hintergrund, bis du nvim schließt.
+        nvim "$opened_file"
+
+    # Fall 2: Yazi wurde normal mit "q" geschlossen
+    else if test -f "$tmp"
+        if read -z cwd <"$tmp"; and test -n "$cwd"; and test "$cwd" != "$PWD"
+            cd "$cwd"
+        end
+        rm -f -- "$tmp" "$cho"
+    end
 end
 
 # vim key bindings in fish
